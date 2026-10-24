@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QRShield · Digital signature authentication</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><path d="M16 2l12 5v8c0 7.5-5 13-12 15C9 28 4 22.5 4 15V7z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M11 16l4 4 7-8" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>
+      <div><strong>QRShield</strong><span>Digital signature authentication</span></div>
+    </div>
+    <div class="chips"><span>RSA-2048</span><span>SHA-256</span><span>PSS padding</span></div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>A QR code you can trust,<br>because it is signed.</h1>
+      <p>Create an access token, sign it with a private key, and turn it into a QR code. Anyone can check it with the public key. Change a single character and the check fails.</p>
+    </section>
+
+    <section class="grid">
+      <!-- Generate -->
+      <article class="panel" id="generate">
+        <h2>Create a signed token</h2>
+        <div class="row">
+          <input id="user" type="text" value="Priyanshu" maxlength="30" placeholder="Name of the person" aria-label="Name of the person">
+          <button id="genBtn" class="btn primary">Generate QR</button>
+        </div>
+
+        <div class="qr-stage">
+          <div class="qr-frame" id="qrFrame">
+            <img id="qrImg" alt="Signed QR code" hidden>
+            <p id="qrEmpty">Your signed QR code will appear here.</p>
+            <div class="scan" id="scan"></div>
+          </div>
+          <dl class="facts">
+            <div><dt>Person</dt><dd id="fUser">-</dd></div>
+            <div><dt>Token</dt><dd id="fToken">-</dd></div>
+            <div><dt>Algorithm</dt><dd id="fAlgo">RSA-2048 / SHA-256</dd></div>
+            <div><dt>Signature</dt><dd id="fSig" class="mono clip">-</dd></div>
+          </dl>
+        </div>
+        <button id="dlBtn" class="btn ghost" disabled>Download QR</button>
+      </article>
+
+      <!-- Verify -->
+      <article class="panel" id="verify">
+        <h2>Check it before granting access</h2>
+        <p class="hint">This is what the verifier receives. Edit the text yourself, or let the button do it.</p>
+        <label for="payload">Authentication data</label>
+        <textarea id="payload" class="mono" rows="4" spellcheck="false" disabled placeholder="Generate a token first."></textarea>
+
+        <div class="row">
+          <button id="verBtn" class="btn primary" disabled>Verify signature</button>
+          <button id="tamperBtn" class="btn danger" disabled>Tamper with it</button>
+          <button id="resetBtn" class="btn ghost" disabled>Restore original</button>
+        </div>
+
+        <div id="result" class="result idle" role="status" aria-live="polite">
+          <span class="dot"></span>
+          <div><strong id="resTitle">Not checked yet</strong><p id="resMsg">Generate a token, then verify it.</p></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="why">
+      <h2>Why QRShield</h2>
+      <p class="lead">A normal QR code is just text. Anyone can print one that says ACCESS=ADMIN, and a scanner has no way to tell the difference. A signature fixes that.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th></th><th class="plain">Plain QR code</th><th class="signed">QRShield QR code</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Who can create one</th><td>Anyone</td><td>Only the holder of the private key</td></tr>
+            <tr><th scope="row">Can the data be edited</th><td>Yes, and nobody notices</td><td>No. Any edit breaks the signature</td></tr>
+            <tr><th scope="row">What a thief gets from a photo</th><td>The whole secret</td><td>A copy they cannot change</td></tr>
+            <tr><th scope="row">What the verifier needs</th><td>Blind trust</td><td>The public key, which is safe to share</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="why-foot">
+        <p><b>Where it fits</b> Event tickets, building badges, boarding passes and certificates. Anywhere a code must be checked without trusting whoever is holding it.</p>
+        <p><b>Known limit</b> A photographed QR still verifies, because a copy carries the same valid signature. Token expiry and replay protection are planned for that.</p>
+      </div>
+    </section>
+
+    <section class="how">
+      <h2>How the check works</h2>
+      <ol>
+        <li><b>Sign</b> The server hashes the data with SHA-256 and signs the hash with its private key.</li>
+        <li><b>Encode</b> The data and signature are packed into the QR code.</li>
+        <li><b>Verify</b> The public key confirms the signature matches the data exactly.</li>
+        <li><b>Decide</b> Match means access granted. Any change means access denied.</li>
+      </ol>
+    </section>
+
+    <section class="future">
+      <h2>Planned next</h2>
+      <p>Camera QR scanning, token expiry and replay protection, JSON payloads, and persistent key storage.</p>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
